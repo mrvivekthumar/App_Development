@@ -1,12 +1,13 @@
 package com.example.audio_player;
 
-import android.content.Context;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,13 +16,25 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private Button playButton;
     private static final String TAG = "AudioPlayer";
+    private VideoView videoView;
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         playButton = findViewById(R.id.playButton);
-        mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.vandemataram);
+        mediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.vivek);
+        videoView = findViewById(R.id.video);
+
+        MediaController mediaController = new MediaController(this);
+        mediaController.setAnchorView(videoView);
+
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.video);
+
+        videoView.setMediaController(mediaController);
+        videoView.setVideoURI(uri);
+        videoView.requestFocus();
 
         // Check if mediaPlayer is prepared
         if (mediaPlayer != null) {
@@ -33,33 +46,37 @@ public class MainActivity extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mediaPlayer.isPlaying()) {
-                    pauseMusic();
+                if (mediaPlayer.isPlaying() || videoView.isPlaying()) {
+                    pauseMedia();
                 } else {
-                    playMusic();
+                    playMedia();
                 }
             }
         });
-
-        // Setting max volume for testing
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
     }
 
-    public void playMusic() {
+    public void playMedia() {
         if (mediaPlayer != null) {
             mediaPlayer.start();
-            Log.d(TAG, "Music started.");
-            playButton.setText(R.string.pause_text);
+            Log.d(TAG, "Audio started.");
         }
+        if (videoView != null) {
+            videoView.start();
+            Log.d(TAG, "Video started.");
+        }
+        playButton.setText(R.string.pause_text);
     }
 
-    public void pauseMusic() {
+    public void pauseMedia() {
         if (mediaPlayer != null) {
             mediaPlayer.pause();
-            Log.d(TAG, "Music paused.");
-            playButton.setText(R.string.play_text);
+            Log.d(TAG, "Audio paused.");
         }
+        if (videoView != null) {
+            videoView.pause();
+            Log.d(TAG, "Video paused.");
+        }
+        playButton.setText(R.string.play_text);
     }
 
     @Override
